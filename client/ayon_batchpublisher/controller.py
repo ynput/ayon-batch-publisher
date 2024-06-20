@@ -20,13 +20,11 @@ GLOB_SEARCH_TO_PRODUCT_INFO_MAP = [
         "glob": "*/fbx/*.fbx",
         "is_sequence": False,
         "product_type": "model",
-        "representation_name": "fbx"
     },
     {
         "glob": "*/ma/*.ma",
         "is_sequence": False,
         "product_type": "model",
-        "representation_name": "maya"
     },
 ]
 
@@ -201,7 +199,6 @@ class BatchPublisherController(object):
         for file_mapping in file_mappings:
             product_type = file_mapping["product_type"]
             glob_full_path = directory + "/" + file_mapping["glob"]
-            representation_name = file_mapping.get("representation_name")
             files = glob.glob(glob_full_path, recursive=False)
             for filepath in files:
                 filename = os.path.basename(filepath)
