@@ -9,24 +9,10 @@ from ayon_api import (
     get_folders,
     get_tasks_by_folder_paths
 )
+from ayon_core.settings import get_project_settings
+
 from ayon_batchpublisher import publish
 
-
-# List that contains dictionary including glob statement to check for match.
-# If filepath matches then it becomes product type.
-# TODO: add to OpenPype settings so other studios can change
-GLOB_SEARCH_TO_PRODUCT_INFO_MAP = [
-    {
-        "glob": "*/fbx/*.fbx",
-        "is_sequence": False,
-        "product_type": "model",
-    },
-    {
-        "glob": "*/ma/*.ma",
-        "is_sequence": False,
-        "product_type": "model",
-    },
-]
 
 # Dictionary that maps the product type (family) to file extensions
 # We only use this as fallback if
@@ -191,43 +177,8 @@ class BatchPublisherController(object):
         product_items = collections.OrderedDict()
         if not directory or not os.path.exists(directory):
             return product_items
-        # project_name = self._selected_project_name
-        # project_settings = get_project_settings(project_name)
-        # file_mappings = project_settings["batchpublisher"].get(
-        #     "file_mappings", [])
-        file_mappings = GLOB_SEARCH_TO_PRODUCT_INFO_MAP
-        for file_mapping in file_mappings:
-            product_type = file_mapping["product_type"]
-            glob_full_path = directory + "/" + file_mapping["glob"]
-            files = glob.glob(glob_full_path, recursive=False)
-            for filepath in files:
-                filename = os.path.basename(filepath)
-                frame_start = None
-                frame_end = None
-                if filename.count(".") >= 2:
-                    # Lets add the star in place of the frame number
-                    filepath_parts = filepath.split(".")
-                    filepath_parts[-2] = "#" * len(filepath_parts[-2])
-                    # Replace the file path with the version with star in it
-                    _filepath = ".".join(filepath_parts)
-                    frames = self._get_frames_for_filepath(_filepath)
-                    if frames:
-                        filepath = _filepath
-                        frame_start = frames[0]
-                        frame_end = frames[-1]
-                # Do not add ingest file path, if it's already been added
-                if filepath in product_items:
-                    continue
-                _filename_no_ext, extension = os.path.splitext(filename)
-                # Create representation name from extension
-                representation_name = extension.lstrip(".")
-                product_item = ProductItem(
-                    filepath,
-                    product_type,
-                    representation_name,
-                    frame_start=frame_start,
-                    frame_end=frame_end)
-                product_items[filepath] = product_item
+        _get_items_from_regex_mapping = self._get_items_from_regex_mapping(
+            directory, product_items)
 
         # Walk the entire directory structure again
         # and look for product items to add.
@@ -274,6 +225,47 @@ class BatchPublisherController(object):
                 product_items[filepath] = product_item
 
         return list(product_items.values())
+
+    def _get_items_from_regex_mapping(self, directory, product_items):
+        """Traverses `directory`, uses regular expressions to guess product"""
+        project_name = self._selected_project_name
+        project_settings = get_project_settings(project_name)
+        file_mappings = project_settings["batchpublisher"].get(
+            "pattern_to_product_type", [])
+        for file_mapping in file_mappings:
+            product_type = file_mapping["product_type"]
+            glob_full_path = directory + "/" + file_mapping["pattern"]
+            files = glob.glob(glob_full_path, recursive=False)
+            for filepath in files:
+                filename = os.path.basename(filepath)
+                frame_start = None
+                frame_end = None
+                if filename.count(".") >= 2:
+                    # Lets add the star in place of the frame number
+                    filepath_parts = filepath.split(".")
+                    filepath_parts[-2] = "#" * len(filepath_parts[-2])
+                    # Replace the file path with the version with star in it
+                    _filepath = ".".join(filepath_parts)
+                    frames = self._get_frames_for_filepath(_filepath)
+                    if frames:
+                        filepath = _filepath
+                        frame_start = frames[0]
+                        frame_end = frames[-1]
+                # Do not add ingest file path, if it's already been added
+                if filepath in product_items:
+                    continue
+                _filename_no_ext, extension = os.path.splitext(filename)
+                # Create representation name from extension
+                representation_name = extension.lstrip(".")
+                product_item = ProductItem(
+                    filepath,
+                    product_type,
+                    representation_name,
+                    frame_start=frame_start,
+                    frame_end=frame_end)
+                product_items[filepath] = product_item
+
+        return product_items
 
     def publish_product_items(self, product_items):
         """
