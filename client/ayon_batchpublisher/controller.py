@@ -3,10 +3,11 @@ import glob
 import os
 import re
 
-# from openpype.settings import get_project_settings
-from ayon_core.client.entities import (
+import ayon_api
+from ayon_api import (
     get_projects,
-    get_assets,
+    get_folders,
+    get_tasks_by_folder_paths
 )
 from ayon_batchpublisher import publish
 
@@ -100,7 +101,10 @@ class ProductItem(object):
         self.version = None
         results = re.findall("_v[0-9]*", self.filepath)
         if results:
-            self.version = int(results[0].replace("_v", ""))
+            try:
+                self.version = int(results[0].replace("_v", ""))
+            except ValueError:
+                print(results[0])
         # Remove version from product name
         self.product_name = re.sub("_v[0-9]*", "", product_name)
         return self.product_name
@@ -157,19 +161,9 @@ class BatchPublisherController(object):
         if not project_name:
             return {}
 
-        asset_docs = self._asset_docs_by_project.get(project_name)
-        if asset_docs is None:
-            asset_docs = list(get_assets(
-                project_name,
-                fields={
-                    "name",
-                    # "data.visualParent",
-                    "data.parents",
-                    "data.tasks",
-                }
-            ))
-            asset_docs_by_path = self._prepare_assets_by_path(asset_docs)
-            self._asset_docs_by_project[project_name] = asset_docs_by_path
+        asset_docs = ayon_api.get_folders(project_name)
+        asset_docs_by_path = self._prepare_assets_by_path(asset_docs)
+        self._asset_docs_by_project[project_name] = asset_docs_by_path
         return self._asset_docs_by_project[project_name]
 
     def get_hierarchy_items(self):
@@ -178,7 +172,7 @@ class BatchPublisherController(object):
             list[HierarchyItem]: List of hierarchy items.
         """
 
-        asset_docs = self._get_asset_docs()
+        asset_docs = get_folders(project_name=self._selected_project_name)
         if not asset_docs:
             return []
 
@@ -193,21 +187,16 @@ class BatchPublisherController(object):
         return output
 
     def get_task_names(self, folder_path):
-        asset_docs_by_path = self._get_asset_docs()
-        if not asset_docs_by_path:
+        if not folder_path:
             return []
-        asset_doc = asset_docs_by_path.get(folder_path)
-        if not asset_doc:
-            return []
-        return list(asset_doc["data"]["tasks"].keys())
+        tasks = get_tasks_by_folder_paths(
+            self._selected_project_name, folder_paths=[folder_path])
+        return [task["name"] for task in tasks[folder_path]]
 
     def _prepare_assets_by_path(self, asset_docs):
         output = {}
         for asset_doc in asset_docs:
-            parents = list(asset_doc["data"]["parents"])
-            parents.append(asset_doc["name"])
-            folder_path = "/" + "/".join(parents)
-            output[folder_path] = asset_doc
+            output[asset_doc["path"]] = asset_doc
         return output
 
     def get_product_items(self, directory):
