@@ -4,7 +4,6 @@ import glob
 import json
 
 from ayon_core.lib import Logger
-from ayon_core.pipeline import legacy_io
 
 
 logger = Logger.get_logger(__name__)
@@ -38,7 +37,7 @@ def publish_version_pyblish(
 
     # from openpype.lib import FileDefItem
 
-    from ayon_core.hosts.traypublisher.api import TrayPublisherHost
+    from ayon_traypublisher.api import TrayPublisherHost
     from ayon_core.pipeline import install_host
     from ayon_core.pipeline.create import CreateContext
     import pyblish.api
