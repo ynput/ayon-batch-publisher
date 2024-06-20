@@ -30,20 +30,6 @@ GLOB_SEARCH_TO_PRODUCT_INFO_MAP = [
     },
 ]
 
-# Dictionary that maps the extension name to the representation name.
-# We only use this as fallback if
-# GLOB_SEARCH_TO_PRODUCT_INFO_MAP doesn't match any glob statement.
-# TODO: add to OpenPype settings so other studios can change
-EXT_TO_REP_NAME_MAP = {
-    ".nk": "nuke",
-    ".ma": "maya",
-    ".mb": "maya",
-    ".hip": "houdini",
-    ".sfx": "silhouette",
-    ".mocha": "mocha",
-    ".psd": "photoshop"
-}
-
 # Dictionary that maps the product type (family) to file extensions
 # We only use this as fallback if
 # GLOB_SEARCH_TO_PRODUCT_INFO_MAP doesn't match any glob statement.
@@ -237,10 +223,7 @@ class BatchPublisherController(object):
                     continue
                 _filename_no_ext, extension = os.path.splitext(filename)
                 # Create representation name from extension
-                representation_name = representation_name or \
-                    EXT_TO_REP_NAME_MAP.get(extension)
-                if not representation_name:
-                    representation_name = extension.lstrip(".")
+                representation_name = extension.lstrip(".")
                 product_item = ProductItem(
                     filepath,
                     product_type,
@@ -284,9 +267,7 @@ class BatchPublisherController(object):
                 if not product_type:
                     continue
                 # Create representation name from extension
-                representation_name = EXT_TO_REP_NAME_MAP.get(extension)
-                if not representation_name:
-                    representation_name = extension.lstrip(".")
+                representation_name = extension.lstrip(".")
                 product_item = ProductItem(
                     filepath,
                     product_type,
