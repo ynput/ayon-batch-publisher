@@ -18,16 +18,6 @@ class BatchPublisherAddon(AYONAddon, IHostAddon, ITrayAction):
 
     def on_action_trigger(self):
         self.show_dialog()
-        # self.run_batchpublisher()
-
-    # def run_batchpublisher(self):
-    #     name = "traypublisher"
-    #     args = get_openpype_execute_args(
-    #         "module", name, "launch"
-    #         # "module", self.name, "launch"
-    #     )
-    #     print("ARGS" , args)
-    #     run_detached_process(args)
 
     def cli(self, click_group):
         click_group.add_command(cli_main)
@@ -53,8 +43,6 @@ class BatchPublisherAddon(AYONAddon, IHostAddon, ITrayAction):
         reload(ayon_batchpublisher.ui.batch_publisher_view)
         reload(ayon_batchpublisher.ui.window)
 
-        # from ayon_batchpublisher.ui.window \
-        #     import BatchPublisherWindow
         self._dialog = ayon_batchpublisher.ui.window. \
             BatchPublisherWindow()
 
