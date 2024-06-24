@@ -230,13 +230,6 @@ def publish_version(
         extra_env=extra_env,
     )
 
-    # Set session environment variables as a few OP plugins
-    # rely on these
-    # legacy_io.Session["AVALON_PROJECT"] = project_name
-    # legacy_io.Session["AVALON_ASSET"] = asset_name
-    # legacy_io.Session["AVALON_TASK"] = task_name
-    # legacy_io.Session["AVALON_WORKDIR"] = extra_env["AVALON_WORKDIR"]
-
     # publish job file
     publish_job = {
         "asset": instance_data["asset"],
@@ -247,7 +240,6 @@ def publish_version(
         "version": None,  # this is workfile version
         "comment": instance_data["comment"],
         "job": {},
-        "session": legacy_io.Session.copy(),
         "instances": instances,
         "deadline_publish_job_id": response.get("_id")
     }
