@@ -14,21 +14,6 @@ from ayon_core.settings import get_project_settings
 from ayon_batchpublisher import publish
 
 
-# Dictionary that maps the product type (family) to file extensions
-# We only use this as fallback if
-# GLOB_SEARCH_TO_PRODUCT_INFO_MAP doesn't match any glob statement.
-# TODO: add to OpenPype settings so other studios can change
-PRODUCT_TYPE_TO_EXT_MAP = {
-    "render": {".exr", ".dpx", ".tif", ".tiff", ".jpg", ".jpeg"},
-    "pointcache": {".abc"},
-    "camera": {".abc", ".fbx"},
-    "reference": {".mov", ".mp4", ".mxf", ".avi", ".wmv"},
-    "workfile": {".nk", ".ma", ".mb", ".hip", ".sfx", ".mocha", ".psd"},
-    "distortion": {".nk", ".exr"},
-    "color_grade": {".ccc", ".cc"},
-}
-
-
 class ProductItem(object):
     def __init__(
             self,
@@ -177,43 +162,37 @@ class BatchPublisherController(object):
         product_items = collections.OrderedDict()
         if not directory or not os.path.exists(directory):
             return product_items
-        _get_items_from_regex_mapping = self._get_items_from_regex_mapping(
-            directory, product_items)
 
-        # Walk the entire directory structure again
-        # and look for product items to add.
-        # This time we are looking for product types
-        # by PRODUCT_TYPE_TO_EXT_MAP
-        for root, _dirs, filenames in os.walk(directory, topdown=False):
-            for filename in filenames:
-                filepath = os.path.join(root, filename)
+        project_name = self._selected_project_name
+        project_settings = get_project_settings(project_name)
+        batchpublisher_sett = project_settings["batchpublisher"]
+
+        file_mappings = batchpublisher_sett["pattern_to_product_type"]
+        product_items = self._get_items_from_regex_mapping(
+            directory, product_items, file_mappings)
+
+        extensions_to_product_mapping = (
+            batchpublisher_sett["extensions_to_product_type"])
+        product_items = self._get_items_from_extension_mapping(
+            directory, product_items, extensions_to_product_mapping)
+
+        return list(product_items.values())
+
+    def _get_items_from_regex_mapping(self, directory, product_items,
+                                      file_mappings):
+        """Traverses `directory`, uses regular expressions to guess product"""
+        for file_mapping in file_mappings:
+            product_type = file_mapping["product_type"]
+            glob_full_path = directory + "/" + file_mapping["pattern"]
+            files = glob.glob(glob_full_path, recursive=False)
+            for filepath in files:
                 filename = os.path.basename(filepath)
-                # Get frame infomration (if any)
-                frame_start = None
-                frame_end = None
-                if filename.count(".") >= 2:
-                    # Lets add the star in place of the frame number
-                    filepath_parts = filepath.split(".")
-                    filepath_parts[-2] = "*"
-                    # Replace the file path with the version with star in it
-                    _filepath = ".".join(filepath_parts)
-                    frames = self._get_frames_for_filepath(_filepath)
-                    if frames:
-                        filepath = _filepath
-                        frame_start = frames[0]
-                        frame_end = frames[-1]
+                filepath, frame_end, frame_start = self._get_frame_info(
+                    filepath)
                 # Do not add ingest file path, if it's already been added
                 if filepath in product_items:
                     continue
                 _filename_no_ext, extension = os.path.splitext(filename)
-                product_type = None
-                for _product_type, extensions in \
-                        PRODUCT_TYPE_TO_EXT_MAP.items():
-                    if extension in extensions:
-                        product_type = _product_type
-                        break
-                if not product_type:
-                    continue
                 # Create representation name from extension
                 representation_name = extension.lstrip(".")
                 product_item = ProductItem(
@@ -224,37 +203,33 @@ class BatchPublisherController(object):
                     frame_end=frame_end)
                 product_items[filepath] = product_item
 
-        return list(product_items.values())
+        return product_items
 
-    def _get_items_from_regex_mapping(self, directory, product_items):
-        """Traverses `directory`, uses regular expressions to guess product"""
-        project_name = self._selected_project_name
-        project_settings = get_project_settings(project_name)
-        file_mappings = project_settings["batchpublisher"].get(
-            "pattern_to_product_type", [])
-        for file_mapping in file_mappings:
-            product_type = file_mapping["product_type"]
-            glob_full_path = directory + "/" + file_mapping["pattern"]
-            files = glob.glob(glob_full_path, recursive=False)
-            for filepath in files:
+    def _get_items_from_extension_mapping(
+            self, directory, product_items, extensions_to_product_mapping):
+        # Walk the entire directory structure again
+        # and look for product items to add.
+        # This time we are looking for product types
+        # by PRODUCT_TYPE_TO_EXT_MAP
+        for root, _dirs, filenames in os.walk(directory, topdown=False):
+            for filename in filenames:
+                filepath = os.path.join(root, filename)
                 filename = os.path.basename(filepath)
-                frame_start = None
-                frame_end = None
-                if filename.count(".") >= 2:
-                    # Lets add the star in place of the frame number
-                    filepath_parts = filepath.split(".")
-                    filepath_parts[-2] = "#" * len(filepath_parts[-2])
-                    # Replace the file path with the version with star in it
-                    _filepath = ".".join(filepath_parts)
-                    frames = self._get_frames_for_filepath(_filepath)
-                    if frames:
-                        filepath = _filepath
-                        frame_start = frames[0]
-                        frame_end = frames[-1]
+                filepath, frame_end, frame_start = self._get_frame_info(
+                    filepath)
                 # Do not add ingest file path, if it's already been added
                 if filepath in product_items:
                     continue
                 _filename_no_ext, extension = os.path.splitext(filename)
+                product_type = None
+                for setting_item in extensions_to_product_mapping:
+                    _product_type = setting_item["name"]
+                    extensions = setting_item["extensions"]
+                    if extension in extensions:
+                        product_type = _product_type
+                        break
+                if not product_type:
+                    continue
                 # Create representation name from extension
                 representation_name = extension.lstrip(".")
                 product_item = ProductItem(
@@ -316,14 +291,24 @@ Project: {self._selected_project_name}
         #     product_item.product_name,
         #     expected_representations,
         #     publish_data)
-        # publish.publish_version(
-        #     project_name,
-        #     asset_name,
-        #     task_name,
-        #     family_name,
-        #     subset_name,
-        #     expected_representations,
-        #     publish_data,
+
+    def _get_frame_info(self, filepath):
+        # Get frame infomration (if any)
+        frame_start = None
+        frame_end = None
+        filename = os.path.basename(filepath)
+        if filename.count(".") >= 2:
+            # Lets add the star in place of the frame number
+            filepath_parts = filepath.split(".")
+            filepath_parts[-2] = "*"
+            # Replace the file path with the version with star in it
+            _filepath = ".".join(filepath_parts)
+            frames = self._get_frames_for_filepath(_filepath)
+            if frames:
+                filepath = _filepath
+                frame_start = frames[0]
+                frame_end = frames[-1]
+        return filepath, frame_end, frame_start
 
     def _get_frames_for_filepath(self, filepath):
         # Collect all the frames found within the paths of glob search string
