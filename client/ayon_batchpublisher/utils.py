@@ -4,9 +4,9 @@ import glob
 import datetime
 import os
 
-from openpype.lib import Logger
-from openpype.pipeline import Anatomy
-from openpype.pipeline.colorspace import get_imageio_config
+from ayon_core.lib import Logger
+from ayon_core.pipeline import Anatomy
+from ayon_core.pipeline.colorspace import get_imageio_config_preset
 
 
 logger = Logger.get_logger(__name__)
@@ -197,7 +197,7 @@ def get_colorspace_settings(project_name):
     Returns:
         tuple | bool: config, file rules or None
     """
-    config_data = get_imageio_config(
+    config_data = get_imageio_config_preset(
         project_name,
         host_name="nuke",  # temporary hack as get_imageio_config
         # doesn't support grabbing just global
