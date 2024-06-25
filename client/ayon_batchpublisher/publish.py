@@ -18,6 +18,12 @@ PUBLISH_TO_SG_FAMILIES = {
 }
 
 
+class PublishReturnItem(object):
+    def __init__(self, logs, error_message):
+        self.logs = logs
+        self.error_message = error_message
+
+
 def publish_version_pyblish(
         project_name,
         folder_path,
@@ -97,16 +103,21 @@ def publish_version_pyblish(
     instance.data.setdefault("representations", [])
     instance.data["representations"].append(representation)
 
-    error_format = ("Failed {plugin.__name__}: {error} -- {error.traceback}")
+    error_format = ("Failed {plugin.__name__}:\n {error}\n{error.traceback}")
 
+    logs = []
+    error_message = None
     for result in pyblish.util.publish_iter(
-            context=pyblish_context,
-            plugins=pyblish_plugins):
+            context=pyblish_context, plugins=pyblish_plugins):
         for record in result["records"]:
-            logging.info("{}: {}".format(result["plugin"].label, record.msg))
+            log_line = "{}: {}".format(result["plugin"].label, record.msg)
+            logging.info(log_line)
+            logs.append(log_line)
+
         if result["error"]:
             error_message = error_format.format(**result)
-            logging.error(error_message)
+
+    return PublishReturnItem(logs, error_message)
 
 
 def publish_version(

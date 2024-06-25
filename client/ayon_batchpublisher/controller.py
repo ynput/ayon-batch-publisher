@@ -2,6 +2,7 @@ import collections
 import glob
 import os
 import re
+from tempfile import NamedTemporaryFile
 
 import ayon_api
 from ayon_api import (
@@ -11,7 +12,7 @@ from ayon_api import (
 )
 from ayon_core.settings import get_project_settings
 
-from ayon_batchpublisher import publish
+from ayon_batchpublisher.publish import publish_version_pyblish
 
 
 class ProductItem(object):
@@ -247,10 +248,27 @@ class BatchPublisherController(object):
         Args:
             product_items (list[ProductItem]): List of ingest files to publish.
         """
-
+        msg = ""
         for product_item in product_items:
             if product_item.enabled and product_item.defined:
-                self._publish_product_item(product_item)
+                publish_return = self._publish_product_item(product_item)
+
+                msg += f"Publish of \n '{product_item.filepath}' \n"
+                error_message = publish_return.error_message
+                if error_message:
+                    msg += f" failed with: \n {error_message} \n\n"
+                    with NamedTemporaryFile(delete=False) as temp_file:
+                        # Write data to the file
+                        for line in publish_return.logs:
+                            temp_file.write(str(line + "\n").encode("utf-8"))
+
+                        # Get the temporary file path (optional)
+                        temp_file_path = temp_file.name
+                        msg += f"Log could be found '{temp_file_path}'.\n\n"
+                else:
+                    msg += "finished successfully.\n\n"
+
+        return msg
 
     def _publish_product_item(self, product_item):
         msg = f"""
@@ -273,7 +291,7 @@ Project: {self._selected_project_name}
         expected_representations = dict()
         expected_representations[product_item.representation_name] = \
             product_item.filepath
-        publish.publish_version_pyblish(
+        return publish_version_pyblish(
             self._selected_project_name,
             product_item.folder_path,
             product_item.task_name,
@@ -283,14 +301,6 @@ Project: {self._selected_project_name}
             publish_data,
             frame_start=product_item.frame_start,
             frame_end=product_item.frame_end)
-        # publish.publish_version(
-        #     self._selected_project_name,
-        #     product_item.folder_path,
-        #     product_item.task_name,
-        #     product_item.product_type,
-        #     product_item.product_name,
-        #     expected_representations,
-        #     publish_data)
 
     def _get_frame_info(self, filepath):
         # Get frame infomration (if any)

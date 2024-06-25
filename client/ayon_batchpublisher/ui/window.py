@@ -2,6 +2,8 @@ from ayon_core import style
 
 from qtpy import QtWidgets
 
+from ayon_core.tools.utils import ErrorMessageBox
+
 from ayon_batchpublisher import controller
 from .batch_publisher_model import BatchPublisherModel
 from .batch_publisher_delegate import BatchPublisherTableDelegate
@@ -173,7 +175,38 @@ class BatchPublisherWindow(QtWidgets.QMainWindow):
                 "You must provide asset, task, family, subset etc")
             return
 
-        self._controller.publish_product_items(product_items)
+        msg = self._controller.publish_product_items(product_items)
+
+        msg_box = BatchPublisherErrorMessage(
+            title="Publish process finished!",
+            parent=self,
+            content=msg
+        )
+        msg_box.show()
+        # Store dialog so is not garbage collected before is shown
+        self._message_dialog = msg_box
+
+        return
+
+
+class BatchPublisherErrorMessage(ErrorMessageBox):
+    """Prints error and provides Copy report support"""
+    def __init__(self, title, parent, content):
+        self._content = content
+        super().__init__(title, parent)
+
+    def _get_report_data(self):
+        return [self._content]
+
+    def _create_content(self, content_layout):
+        line = self._create_line()
+        content_layout.addWidget(line)
+
+        message_label_widget = QtWidgets.QLabel(self)
+        message_label_widget.setText(
+            self.convert_text_for_html(str(self._content))
+        )
+        content_layout.addWidget(message_label_widget)
 
 
 def main():
