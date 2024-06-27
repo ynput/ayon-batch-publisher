@@ -289,9 +289,9 @@ Project: {self._selected_project_name}
             "version": product_item.version,
             "comment": product_item.comment,
         }
-        expected_representations = dict()
-        expected_representations[product_item.representation_name] = \
-            product_item.filepath
+        expected_representations = {
+            product_item.representation_name: product_item.filepath
+        }
         return publish_version_pyblish(
             self._selected_project_name,
             product_item.folder_path,
