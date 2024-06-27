@@ -198,6 +198,16 @@ class BatchPublisherErrorMessage(ErrorMessageBox):
     def _get_report_data(self):
         return [self._content]
 
+    def _create_top_widget(self, parent_widget):
+        header_text = "Something went wrong"
+        if "failed" not in self._content:
+            header_text = "Published successfully"
+        label_widget = QtWidgets.QLabel(parent_widget)
+        label_widget.setText(
+            f"<span style='font-size:18pt;'>{header_text}</span>"
+        )
+        return label_widget
+
     def _create_content(self, content_layout):
         line = self._create_line()
         content_layout.addWidget(line)
