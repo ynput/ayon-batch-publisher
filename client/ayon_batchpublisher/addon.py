@@ -9,7 +9,6 @@ class BatchPublisherAddon(AYONAddon, IHostAddon, ITrayAction):
     host_name = "batchpublisher"
 
     def initialize(self, modules_settings):
-        self.enabled = True
         # UI which must not be created at this time
         self._dialog = None
 
