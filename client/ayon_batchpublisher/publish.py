@@ -32,8 +32,8 @@ def publish_version_pyblish(
         project_name,
         folder_path,
         task_name,
-        family_name,
-        subset_name,
+        product_type,
+        product_name,
         expected_representations,
         publish_data,
         frame_start=None,
@@ -53,14 +53,14 @@ def publish_version_pyblish(
     pyblish_plugins = create_context.publish_plugins
 
     instance = pyblish_context.create_instance(
-        name=subset_name,
-        family=family_name)
+        name=product_name,
+        family=product_type)
     instance.data.update(
         {
-            "productType": family_name,
+            "productType": product_type,
             "folderPath": folder_path,
             "task": task_name,
-            "productName": subset_name,
+            "productName": product_name,
             "publish": True,
             "active": True,
             "version": publish_data.get("version"),
