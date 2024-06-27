@@ -6,7 +6,7 @@ import pyblish.api
 from ayon_core.lib import Logger
 from ayon_core.pipeline import install_host
 from ayon_core.pipeline.create import CreateContext
-from ayon_traypublisher.api import TrayPublisherHost
+from ayon_batchpublisher.api import BatchPublisherHost
 
 logger = Logger.get_logger(__name__)
 
@@ -33,7 +33,7 @@ def publish_version_pyblish(
     representation_name = list(expected_representations.keys())[0]
     file_path = list(expected_representations.values())[0]
 
-    host = TrayPublisherHost()
+    host = BatchPublisherHost()
     install_host(host)
 
     create_context = CreateContext(host)
@@ -46,6 +46,7 @@ def publish_version_pyblish(
         family=product_type)
     instance.data.update(
         {
+            "source": file_path,
             "productType": product_type,
             "folderPath": folder_path,
             "task": task_name,
