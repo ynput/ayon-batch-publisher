@@ -1,4 +1,4 @@
-import click
+from ayon_core.addon import click_wrap
 
 from ayon_core.addon import AYONAddon, IHostAddon, ITrayAction
 
@@ -58,7 +58,8 @@ class BatchPublisherAddon(AYONAddon, IHostAddon, ITrayAction):
         self._dialog.show()
 
 
-@click.group(BatchPublisherAddon.name, help="BatchPublisher related commands.")
+@click_wrap.group(
+    BatchPublisherAddon.name, help="BatchPublisher related commands.")
 def cli_main():
     pass
 
