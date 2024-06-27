@@ -19,7 +19,7 @@ class BatchPublisherAddon(AYONAddon, IHostAddon, ITrayAction):
         self.show_dialog()
 
     def cli(self, click_group):
-        click_group.add_command(cli_main)
+        click_group.add_command(cli_main.to_click_obj())
 
     def _create_dialog(self):
         # # Don't recreate dialog if already exists
