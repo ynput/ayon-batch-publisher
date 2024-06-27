@@ -35,13 +35,10 @@ def publish_version_pyblish(
         frame_start=None,
         frame_end=None):
 
-    # os.environ["AVALON_PROJECT"] = project_name
     os.environ["AYON_PROJECT_NAME"] = project_name
 
     representation_name = list(expected_representations.keys())[0]
     file_path = list(expected_representations.values())[0]
-
-    # from openpype.lib import FileDefItem
 
     from ayon_traypublisher.api import TrayPublisherHost
     from ayon_core.pipeline import install_host
@@ -62,14 +59,12 @@ def publish_version_pyblish(
         family=family_name)
     instance.data.update(
         {
-            # "project": project_name,
             "productType": family_name,
             "folderPath": folder_path,
             "task": task_name,
             "productName": subset_name,
             "publish": True,
             "active": True,
-            # "source": file_path,
             "version": publish_data.get("version"),
             "comment": publish_data.get("comment"),
             "frameStart": frame_start,
@@ -79,7 +74,7 @@ def publish_version_pyblish(
         })
 
     directory = os.path.dirname(file_path)
-    # If file path has star in in lets collect all the file names
+    # If file path has star in it lets collect all the file names
     if "*" in file_path:
         _filepaths = glob.glob(file_path)
         file_names = list()
@@ -237,7 +232,6 @@ def publish_version(
         plugin_data=plugin_data,
         batch_name=publish_data.get("jobBatchName") or deadline_task_name,
         task_name=deadline_task_name,
-        # group=dl_constants.OP_GROUP,
         extra_env=extra_env,
     )
 
