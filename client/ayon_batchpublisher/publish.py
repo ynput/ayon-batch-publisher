@@ -3,8 +3,12 @@ import getpass
 import glob
 import json
 
-from ayon_core.lib import Logger
+import pyblish.api
 
+from ayon_core.lib import Logger
+from ayon_core.pipeline import install_host
+from ayon_core.pipeline.create import CreateContext
+from ayon_traypublisher.api import TrayPublisherHost
 
 logger = Logger.get_logger(__name__)
 
@@ -39,12 +43,6 @@ def publish_version_pyblish(
 
     representation_name = list(expected_representations.keys())[0]
     file_path = list(expected_representations.values())[0]
-
-    from ayon_traypublisher.api import TrayPublisherHost
-    from ayon_core.pipeline import install_host
-    from ayon_core.pipeline.create import CreateContext
-    import pyblish.api
-    import logging
 
     host = TrayPublisherHost()
     install_host(host)
@@ -106,7 +104,7 @@ def publish_version_pyblish(
             context=pyblish_context, plugins=pyblish_plugins):
         for record in result["records"]:
             log_line = "{}: {}".format(result["plugin"].label, record.msg)
-            logging.info(log_line)
+            logger.info(log_line)
             logs.append(log_line)
 
         if result["error"]:
