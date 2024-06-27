@@ -83,7 +83,8 @@ class BatchPublisherModel(QtCore.QAbstractTableModel):
             elif column == BatchPublisherModel.COLUMN_OF_PRODUCT_TYPE:
                 # Check family is valid in available families
                 # Product type might also be reset to None.
-                if value is None or value in integrate.IntegrateAsset.families:
+                product_types = self._controller.get_product_types()
+                if value is None or value in product_types:
                     product_item.product_type = value
                     # Update the product name based on product type
                     product_item.derive_product_name()

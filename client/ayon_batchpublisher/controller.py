@@ -91,6 +91,7 @@ class BatchPublisherController(object):
         self._project_names = None
         self._asset_docs_by_project = {}
         self._asset_docs_by_path = {}
+        self._product_types = set()
 
     def get_project_names(self):
         if self._project_names is None:
@@ -106,6 +107,7 @@ class BatchPublisherController(object):
 
     def set_selected_project_name(self, project_name):
         self._selected_project_name = project_name
+        self._product_types = set()
 
     def _get_asset_docs(self):
         """
@@ -154,6 +156,30 @@ class BatchPublisherController(object):
         for asset_doc in asset_docs:
             output[asset_doc["path"]] = asset_doc
         return output
+
+    def get_product_types(self):
+        """Returns configured product types from Setting.
+
+        We don't have system wide list of product types, to only available
+        product types are configured directly in Batchpublisher Settings.
+        Returns:
+            set[str]: ('render', 'model', ...)
+        """
+        if not self._product_types:
+            project_name = self._selected_project_name
+            project_settings = get_project_settings(project_name)
+            batchpublisher_sett = project_settings["batchpublisher"]
+
+            file_mappings = batchpublisher_sett["pattern_to_product_type"]
+            for file_mapping in file_mappings:
+                self._product_types.add(file_mapping["product_type"])
+
+            extensions_to_product_mapping = (
+                batchpublisher_sett["extensions_to_product_type"])
+            for setting_item in extensions_to_product_mapping:
+                self._product_types.add(setting_item["name"])
+
+        return self._product_types
 
     def get_product_items(self, directory):
         """

@@ -77,8 +77,8 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
             return editor
 
         elif index.column() == BatchPublisherModel.COLUMN_OF_PRODUCT_TYPE:
-            from ayon_core.plugins.publish import integrate
-            product_types = sorted(integrate.IntegrateAsset.families)
+            product_types = self._controller.get_product_types()
+            product_types = sorted(product_types)
             editor = QtWidgets.QComboBox(parent)
             editor.addItems(product_types)
             return editor
