@@ -1,7 +1,5 @@
 import os
-import getpass
 import glob
-import json
 
 import pyblish.api
 
