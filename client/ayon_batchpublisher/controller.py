@@ -285,9 +285,10 @@ Frame end: {product_item.frame_end}
 Project: {self._selected_project_name}
 """
         print(msg)
-        publish_data = dict()
-        publish_data["version"] = product_item.version
-        publish_data["comment"] = product_item.comment
+        publish_data = {
+            "version": product_item.version,
+            "comment": product_item.comment,
+        }
         expected_representations = dict()
         expected_representations[product_item.representation_name] = \
             product_item.filepath
