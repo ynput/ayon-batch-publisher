@@ -273,10 +273,10 @@ class BatchPublisherController(object):
     def _publish_product_item(self, product_item):
         msg = f"""
 Publishing (ingesting): {product_item.filepath}
-As Folder (Asset): {product_item.folder_path}
+As Folder: {product_item.folder_path}
 Task: {product_item.task_name}
-Product Type (Family): {product_item.product_type}
-Product Name (Subset): {product_item.product_name}
+Product Type: {product_item.product_type}
+Product Name: {product_item.product_name}
 Representation: {product_item.representation_name}
 Version: {product_item.version}
 Comment: {product_item.comment}
