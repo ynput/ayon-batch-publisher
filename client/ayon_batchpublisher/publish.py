@@ -11,15 +11,6 @@ from ayon_traypublisher.api import TrayPublisherHost
 logger = Logger.get_logger(__name__)
 
 
-REVIEW_FAMILIES = {
-    "render"
-}
-
-PUBLISH_TO_SG_FAMILIES = {
-    "render"
-}
-
-
 class PublishReturnItem(object):
     def __init__(self, logs, error_message):
         self.logs = logs
