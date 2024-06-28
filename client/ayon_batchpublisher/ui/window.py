@@ -1,5 +1,6 @@
-from qtpy import QtWidgets
 import platform
+
+from qtpy import QtWidgets
 
 from ayon_core import style
 from ayon_core.lib import is_running_from_build
