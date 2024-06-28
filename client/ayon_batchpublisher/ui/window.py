@@ -2,16 +2,15 @@ from qtpy import QtWidgets
 import platform
 
 from ayon_core import style
-from ayon_core.tools.utils import ErrorMessageBox
+from ayon_core.lib import is_running_from_build
+from ayon_core.pipeline import install_host
+from ayon_core.tools.utils import ErrorMessageBox, get_ayon_qt_app
 
 from ayon_batchpublisher import controller
+
 from .batch_publisher_model import BatchPublisherModel
 from .batch_publisher_delegate import BatchPublisherTableDelegate
 from .batch_publisher_view import BatchPublisherTableView
-
-from ayon_core.lib import is_running_from_build
-from ayon_core.pipeline import install_host
-from ayon_core.tools.utils import get_ayon_qt_app
 
 
 class BatchPublisherWindow(QtWidgets.QMainWindow):
