@@ -77,33 +77,6 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
             value = editor.currentText()
             model.setData(index, value, QtCore.Qt.EditRole)
 
-    def _fill_model_with_hierarchy(self, model):
-        hierarchy_items = self._controller.get_hierarchy_items()
-        hierarchy_items_by_parent_id = collections.defaultdict(list)
-        for hierarchy_item in hierarchy_items:
-            hierarchy_items_by_parent_id[hierarchy_item.parent_id].append(
-                hierarchy_item
-            )
-
-        root_item = model.invisibleRootItem()
-
-        hierarchy_queue = collections.deque()
-        hierarchy_queue.append((root_item, None))
-
-        while hierarchy_queue:
-            (parent_item, parent_id) = hierarchy_queue.popleft()
-            new_rows = []
-            for hierarchy_item in hierarchy_items_by_parent_id[parent_id]:
-                new_row = QtGui.QStandardItem(hierarchy_item.folder_name)
-                new_row.setData(hierarchy_item.folder_path, FOLDER_PATH_ROLE)
-                new_row.setData(
-                    hierarchy_item.folder_path, QtCore.Qt.ToolTipRole)
-                new_rows.append(new_row)
-                hierarchy_queue.append((new_row, hierarchy_item.folder_id))
-
-            if new_rows:
-                parent_item.appendRows(new_rows)
-
     def _on_choose_context(self, folder_path):
         project_name = self._controller.get_selected_project_name()
         dialog = ContextDialog()

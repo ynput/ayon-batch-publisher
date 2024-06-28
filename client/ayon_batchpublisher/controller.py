@@ -124,26 +124,6 @@ class BatchPublisherController(object):
         self._asset_docs_by_project[project_name] = asset_docs_by_path
         return self._asset_docs_by_project[project_name]
 
-    def get_hierarchy_items(self):
-        """
-        Returns:
-            list[HierarchyItem]: List of hierarchy items.
-        """
-
-        asset_docs = get_folders(project_name=self._selected_project_name)
-        if not asset_docs:
-            return []
-
-        output = []
-        for folder_path, asset_doc in asset_docs.items():
-            folder_name = asset_doc["name"]
-            folder_id = asset_doc["_id"]
-            parent_id = asset_doc["data"]["visualParent"]
-            hierarchy_item = HierarchyItem(
-                folder_name, folder_path, folder_id, parent_id)
-            output.append(hierarchy_item)
-        return output
-
     def get_task_names(self, folder_path):
         if not folder_path:
             return []
