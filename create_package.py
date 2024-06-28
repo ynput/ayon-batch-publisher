@@ -295,8 +295,6 @@ def zip_client_side(addon_package_dir, current_dir, log):
             sub_path = os.path.join(ADDON_CLIENT_DIR, sub_path)
             zipf.write(path, sub_path)
 
-    shutil.copy(os.path.join(client_dir, "pyproject.toml"), private_dir)
-
 
 def create_server_package(
     output_dir: str,
