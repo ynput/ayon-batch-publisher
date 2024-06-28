@@ -37,43 +37,12 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
                             model.index(_index.row(), model.COLUMN_OF_TASK),
                             task_name,
                             QtCore.Qt.EditRole)
-            # # clear the folder
-            # model.setData(index, None, QtCore.Qt.EditRole)
-            # # clear the task
-            # model.setData(
-            #     model.index(index.row(), BatchPublisherModel.COLUMN_OF_TASK),
-            #     None,
-            #     QtCore.Qt.EditRole)
-            # treeview = QtWidgets.QTreeView()
-            # treeview.setEditTriggers(QtWidgets.QTreeView.NoEditTriggers)
-            # treeview.setSelectionBehavior(QtWidgets.QTreeView.SelectRows)
-            # treeview.setSelectionMode(QtWidgets.QTreeView.SingleSelection)
-            # treeview.setItemsExpandable(True)
-            # treeview.header().setVisible(False)
-            # treeview.setMinimumHeight(250)
-            # editor = ComboBox(parent)
-            # editor.setInsertPolicy(QtWidgets.QComboBox.NoInsert)
-            # editor.setView(treeview)
-            # model = QtGui.QStandardItemModel()
-            # editor.setModel(model)
-            # self._fill_model_with_hierarchy(model)
-            # editor.view().expandAll()
-            # # editor.showPopup()
-            # # editor = QtWidgets.QLineEdit(parent)
-            # # completer = QtWidgets.QCompleter(self._folder_names, self)
-            # # completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-            # # editor.setCompleter(completer)
+
             return editor
 
         elif index.column() == BatchPublisherModel.COLUMN_OF_TASK:
             task_names = self._controller.get_task_names(
                 ingest_file.folder_path)
-            # editor = QtWidgets.QLineEdit(parent)
-            # completer = QtWidgets.QCompleter(
-            #     task_names,
-            #     self)
-            # completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-            # editor.setCompleter(completer)
             editor = QtWidgets.QComboBox(parent)
             editor.addItems(task_names)
             return editor
@@ -84,21 +53,8 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
             editor = QtWidgets.QComboBox(parent)
             editor.addItems(product_types)
             return editor
-        # return QtWidgets.QStyledItemDelegate.createEditor(
-        #     self,
-        #     parent,
-        #     option,
-        #     index)
 
     def setEditorData(self, editor, index):
-        # if index.column() == BatchPublisherModel.COLUMN_OF_FOLDER:
-        #     editor.blockSignals(True)
-        #     # value = index.data(QtCore.Qt.DisplayRole)
-        #     # editor.setText(value)
-        #     # Lets return the QComboxBox back to unselected state
-        #     editor.setRootModelIndex(QtCore.QModelIndex())
-        #     editor.setCurrentIndex(-1)
-        #     editor.blockSignals(False)
         if index.column() == BatchPublisherModel.COLUMN_OF_TASK:
             editor.blockSignals(True)
             value = index.data(QtCore.Qt.DisplayRole)
@@ -114,12 +70,6 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
 
     def setModelData(self, editor, model, index):
         model = index.model()
-        # if index.column() == BatchPublisherModel.COLUMN_OF_FOLDER:
-        #     # value = editor.text()
-        #     value = editor.model().data(
-        #         editor.view().currentIndex(),
-        #         FOLDER_PATH_ROLE)
-        #     model.setData(index, value, QtCore.Qt.EditRole)
         if index.column() == BatchPublisherModel.COLUMN_OF_TASK:
             value = editor.currentText()
             model.setData(index, value, QtCore.Qt.EditRole)
@@ -148,8 +98,6 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
                 new_row.setData(hierarchy_item.folder_path, FOLDER_PATH_ROLE)
                 new_row.setData(
                     hierarchy_item.folder_path, QtCore.Qt.ToolTipRole)
-                # new_row.setFlags(
-                #     QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsEnabled)
                 new_rows.append(new_row)
                 hierarchy_queue.append((new_row, hierarchy_item.folder_id))
 
