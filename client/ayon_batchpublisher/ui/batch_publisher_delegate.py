@@ -2,6 +2,8 @@ import collections
 
 from qtpy import QtWidgets, QtCore, QtGui
 
+from ayon_core.tools.context_dialog import ContextDialog
+
 from .batch_publisher_model import BatchPublisherModel
 
 FOLDER_PATH_ROLE = QtCore.Qt.UserRole + 1
@@ -155,7 +157,6 @@ class BatchPublisherTableDelegate(QtWidgets.QStyledItemDelegate):
                 parent_item.appendRows(new_rows)
 
     def _on_choose_context(self, folder_path):
-        from ayon_core.tools.context_dialog import ContextDialog
         project_name = self._controller.get_selected_project_name()
         dialog = ContextDialog()
         dialog._project_combobox.hide()
