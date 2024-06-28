@@ -5,7 +5,7 @@ from ayon_core.plugins.publish import integrate
 
 class BatchPublisherModel(QtCore.QAbstractTableModel):
     HEADER_LABELS = [
-        str(),
+        "",
         "Filepath",
         "Folder",
         "Task",
